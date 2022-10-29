@@ -1,5 +1,13 @@
 import { EntityManager } from "typeorm";
 
-export interface ResolverContext {
+export interface AppContext {
   entityManager: EntityManager;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      context: AppContext;
+    }
+  }
 }

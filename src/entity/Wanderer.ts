@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from "type-graphql";
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @ObjectType()
 @Entity()
@@ -9,7 +9,7 @@ export class Wanderer {
   id!: number;
 
   @Field()
-  @PrimaryColumn()
+  @Column()
   email: string;
 
   @Field()

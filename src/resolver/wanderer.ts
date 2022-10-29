@@ -1,17 +1,17 @@
 import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
 import { Wanderer } from "../entity/Wanderer";
-import { ResolverContext } from "../types";
+import { AppContext } from "../types";
 
 @Resolver()
 export class WandererResolver {
   @Query(() => [Wanderer])
-  wanderers(@Ctx() { entityManager }: ResolverContext): Promise<Wanderer[]> {
+  wanderers(@Ctx() { entityManager }: AppContext): Promise<Wanderer[]> {
     return entityManager.find(Wanderer);
   }
 
   @Query(() => Wanderer, { nullable: true })
   wanderer(
-    @Ctx() { entityManager }: ResolverContext,
+    @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number
   ): Promise<Wanderer | null> {
     return entityManager.findOneBy(Wanderer, { id });
@@ -19,7 +19,7 @@ export class WandererResolver {
 
   @Mutation(() => Wanderer)
   createWanderer(
-    @Ctx() { entityManager }: ResolverContext,
+    @Ctx() { entityManager }: AppContext,
     @Arg("email") email: string,
     @Arg("firstName") firstName: string,
     @Arg("lastName") lastName: string,
@@ -35,7 +35,7 @@ export class WandererResolver {
 
   @Mutation(() => Wanderer, { nullable: true })
   async updateWanderer(
-    @Ctx() { entityManager }: ResolverContext,
+    @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number,
     @Arg("email", { nullable: true }) email?: string,
     @Arg("firstName", { nullable: true }) firstName?: string,
@@ -63,7 +63,7 @@ export class WandererResolver {
 
   @Mutation(() => Boolean, { nullable: true })
   async deleteWanderer(
-    @Ctx() { entityManager }: ResolverContext,
+    @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number
   ): Promise<boolean> {
     await entityManager.delete(Wanderer, { id });

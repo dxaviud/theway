@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "migration:gen": "pnpm build && pnpm typeorm migration:generate ./src/migration/migration -d ./dist/data-source.js",
     "migration:run": "pnpm build && pnpm typeorm migration:run -d ./dist/data-source.js",
-    "clean": "rm -rf dist & rm -rf node_modules && pnpm i"
+    "clean": "rm -rf dist & rm -rf node_modules && pnpm i",
+    "schema:drop": "pnpm typeorm schema:drop -d ./dist/data-source.js"
   },
   "keywords": [],
   "author": "David Xu",

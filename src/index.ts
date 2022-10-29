@@ -2,10 +2,11 @@ import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
+import { wanderer } from "./controller/wanderer";
 import { AppDataSource } from "./data-source";
 import { HelloResolver } from "./resolver/hello";
 import { WandererResolver } from "./resolver/wanderer";
-import { ResolverContext } from "./types";
+import { AppContext } from "./types";
 
 (async () => {
   await AppDataSource.initialize();
@@ -20,17 +21,15 @@ import { ResolverContext } from "./types";
   // await wandererRepository.save(wanderer);
   // console.log("Saved a new wanderer with id: " + wanderer.id);
 
-  // console.log("Loading wanderer from the database...");
-  // const wanderers = await wandererRepository.find();
-  // console.log("Loaded wanderers: ", wanderers);
-
-  // console.log(
-  //   "Here you can setup and run express / fastify / any other framework."
-  // );
   const app = express();
-  const context: ResolverContext = {
+  const context: AppContext = {
     entityManager: AppDataSource.manager,
   };
+  app.use((req, _, next) => {
+    req.context = context;
+    next();
+  });
+  app.use("/wanderer", wanderer);
   app.use(
     "/graphql",
     graphqlHTTP({
