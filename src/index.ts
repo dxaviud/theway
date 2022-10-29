@@ -1,7 +1,8 @@
 import express from "express";
+import { graphqlHTTP } from "express-graphql";
+import { buildSchema } from "graphql";
 import "reflect-metadata";
 import { AppDataSource } from "./data-source";
-import { Wanderer } from "./entity/Wanderer";
 
 (async () => {
   await AppDataSource.initialize();
@@ -24,6 +25,22 @@ import { Wanderer } from "./entity/Wanderer";
   //   "Here you can setup and run express / fastify / any other framework."
   // );
   const app = express();
+  app.use(
+    "/graphql",
+    graphqlHTTP({
+      schema: buildSchema(`
+      type Query {
+        hello: String
+      }
+    `),
+      rootValue: {
+        hello: () => {
+          return "Hello World";
+        },
+      },
+      graphiql: true,
+    })
+  );
   app.get("/", (_, res) => {
     res.send("Hello World");
   });
