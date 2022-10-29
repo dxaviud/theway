@@ -1,8 +1,11 @@
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
-import { buildSchema } from "graphql";
 import "reflect-metadata";
+import { buildSchema } from "type-graphql";
 import { AppDataSource } from "./data-source";
+import { HelloResolver } from "./resolver/hello";
+import { WandererResolver } from "./resolver/wanderer";
+import { ResolverContext } from "./types";
 
 (async () => {
   await AppDataSource.initialize();
@@ -25,20 +28,22 @@ import { AppDataSource } from "./data-source";
   //   "Here you can setup and run express / fastify / any other framework."
   // );
   const app = express();
+  const context: ResolverContext = {
+    entityManager: AppDataSource.manager,
+  };
   app.use(
     "/graphql",
     graphqlHTTP({
-      schema: buildSchema(`
-      type Query {
-        hello: String
-      }
-    `),
-      rootValue: {
-        hello: () => {
-          return "Hello World";
+      schema: await buildSchema({
+        resolvers: [HelloResolver, WandererResolver],
+        emitSchemaFile: {
+          path: "src/schema.gql",
+          commentDescriptions: true,
+          sortedSchema: false,
         },
-      },
+      }),
       graphiql: true,
+      context,
     })
   );
   app.get("/", (_, res) => {
