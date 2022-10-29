@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "migration:gen": "pnpm build && pnpm typeorm migration:generate ./src/migration/migration -d ./dist/data-source.js",
     "migration:run": "pnpm build && pnpm typeorm migration:run -d ./dist/data-source.js",
-    "clean": "rm -rf dist & rm -rf node_modules && pnpm i"
+    "clean": "rm -rf dist & rm -rf node_modules && pnpm i",
+    "schema:drop": "pnpm typeorm schema:drop -d ./dist/data-source.js"
   },
   "keywords": [],
   "author": "David Xu",
@@ -22,11 +23,13 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "class-validator": "^0.13.2",
     "express": "^4.18.2",
     "express-graphql": "^0.12.0",
     "graphql": "^15.3.0",
     "pg": "^8.8.0",
     "reflect-metadata": "^0.1.13",
+    "type-graphql": "^1.1.1",
     "typeorm": "^0.3.10"
   }
 }
