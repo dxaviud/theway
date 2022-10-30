@@ -4,6 +4,7 @@
 # -----------------------------------------------
 
 type Query {
+  me: Wanderer
   wanderers: [Wanderer!]!
   wanderer(id: Int!): Wanderer
   hello: String!

@@ -13,6 +13,10 @@ wanderer.get("/", async (req, res) => {
   res.json(await resolver.wanderers(req.context));
 });
 
+wanderer.get("/me", async (req, res) => {
+  res.json(await resolver.me(req.context));
+});
+
 wanderer.get("/:id", async (req, res) => {
   const wanderer = await resolver.wanderer(req.context, Number(req.params.id));
   if (!wanderer) {

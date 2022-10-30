@@ -67,6 +67,18 @@ class LoginResponse {
 
 @Resolver()
 export class WandererResolver {
+  @Query(() => Wanderer, { nullable: true })
+  async me(
+    @Ctx() { entityManager, req }: AppContext
+  ): Promise<Wanderer | null> {
+    if (!req?.session.wandererId) {
+      return null;
+    }
+    return await entityManager.findOneBy(Wanderer, {
+      id: req.session.wandererId,
+    });
+  }
+
   @Query(() => [Wanderer])
   wanderers(@Ctx() { entityManager }: AppContext): Promise<Wanderer[]> {
     return entityManager.find(Wanderer);
@@ -151,7 +163,7 @@ export class WandererResolver {
     if (!req) {
       throw new Error("request missing");
     }
-    req.session.wandererId = String(wanderer.id);
+    req.session.wandererId = wanderer.id;
     return { wanderer };
   }
 }
