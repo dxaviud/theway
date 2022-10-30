@@ -49,6 +49,6 @@ import { AppContext } from "./types";
     res.send("Hello World");
   });
   app.listen(4000, () => {
-    console.log("Express server started listenting on localhost:4000");
+    console.log("Express server listening on localhost:4000");
   });
 })();

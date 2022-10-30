@@ -1,5 +1,7 @@
 import express, { Router } from "express";
-import { WandererResolver } from "../resolver/wanderer";
+import { QueryFailedError } from "typeorm";
+import { createInputProps, WandererResolver } from "../resolver/wanderer";
+import { hasProperties } from "../util";
 
 export const wanderer = Router();
 
@@ -12,34 +14,56 @@ wanderer.get("/", async (req, res) => {
 });
 
 wanderer.get("/:id", async (req, res) => {
-  res.json(await resolver.wanderer(req.context, Number(req.params.id)));
+  const wanderer = await resolver.wanderer(req.context, Number(req.params.id));
+  if (!wanderer) {
+    res.sendStatus(404);
+    return;
+  }
+  res.json(wanderer);
 });
 
-wanderer.post("/create", async (req, res) => {
+wanderer.post("/create", async (req, res, next) => {
   console.log("create wanderer");
-  res.json(
-    await resolver.createWanderer(
-      req.context,
-      req.body.email,
-      req.body.firstName,
-      req.body.lastName,
-      Number(req.body.age)
-    )
-  );
+  if (!hasProperties(req.body, createInputProps)) {
+    res.sendStatus(400);
+    return;
+  }
+  try {
+    res.json(await resolver.createWanderer(req.context, req.body));
+  } catch (err) {
+    console.log(err);
+    if (err instanceof QueryFailedError) {
+      err.message.includes("violates unique constraint");
+      res.sendStatus(400);
+      return;
+    }
+    next(err);
+    return;
+  }
 });
 
-wanderer.post("/update/:id", async (req, res) => {
+wanderer.post("/update/:id", async (req, res, next) => {
   console.log("update wanderer w/ id", req.params.id);
-  res.json(
-    await resolver.updateWanderer(
+  try {
+    const wanderer = await resolver.updateWanderer(
       req.context,
       Number(req.params.id),
-      req.body.email,
-      req.body.firstName,
-      req.body.lastName,
-      Number(req.body.age)
-    )
-  );
+      req.body
+    );
+    if (!wanderer) {
+      res.sendStatus(404);
+      return;
+    }
+    res.json(wanderer);
+  } catch (err) {
+    if (err instanceof QueryFailedError) {
+      err.message.includes("violates unique constraint");
+      res.sendStatus(400);
+      return;
+    }
+    next(err);
+    return;
+  }
 });
 
 wanderer.post("/delete/:id", async (req, res) => {

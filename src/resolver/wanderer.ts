@@ -1,6 +1,59 @@
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import argon2 from "argon2";
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+} from "type-graphql";
 import { Wanderer } from "../entity/Wanderer";
 import { AppContext } from "../types";
+
+@InputType()
+class CreateInput {
+  @Field()
+  email: string;
+
+  @Field()
+  firstName: string;
+
+  @Field()
+  lastName: string;
+
+  @Field()
+  username: string;
+
+  @Field()
+  password: string;
+}
+export const createInputProps = [
+  "email",
+  "firstName",
+  "lastName",
+  "username",
+  "password",
+]; // keep in sync with CreateInput
+
+@InputType()
+class UpdateInput {
+  @Field({ nullable: true })
+  email?: string;
+
+  @Field({ nullable: true })
+  firstName?: string;
+
+  @Field({ nullable: true })
+  lastName?: string;
+
+  @Field({ nullable: true })
+  username?: string;
+
+  @Field({ nullable: true })
+  password?: string;
+}
 
 @Resolver()
 export class WandererResolver {
@@ -18,18 +71,18 @@ export class WandererResolver {
   }
 
   @Mutation(() => Wanderer)
-  createWanderer(
+  async createWanderer(
     @Ctx() { entityManager }: AppContext,
-    @Arg("email") email: string,
-    @Arg("firstName") firstName: string,
-    @Arg("lastName") lastName: string,
-    @Arg("age", () => Int) age: number
+    @Arg("input")
+    { email, firstName, lastName, username, password }: CreateInput
   ): Promise<Wanderer> {
+    const passwordHash = await argon2.hash(password);
     return entityManager.save(Wanderer, {
       email,
       firstName,
       lastName,
-      age,
+      username,
+      passwordHash,
     });
   }
 
@@ -37,10 +90,8 @@ export class WandererResolver {
   async updateWanderer(
     @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number,
-    @Arg("email", { nullable: true }) email?: string,
-    @Arg("firstName", { nullable: true }) firstName?: string,
-    @Arg("lastName", { nullable: true }) lastName?: string,
-    @Arg("age", () => Int, { nullable: true }) age?: number
+    @Arg("input")
+    { email, firstName, lastName, username, password }: UpdateInput
   ): Promise<Wanderer | null> {
     const wanderer = await entityManager.findOneBy(Wanderer, { id });
     if (!wanderer) {
@@ -55,8 +106,11 @@ export class WandererResolver {
     if (lastName !== undefined) {
       wanderer.lastName = lastName;
     }
-    if (age !== undefined) {
-      wanderer.age = age;
+    if (username !== undefined) {
+      wanderer.username = username;
+    }
+    if (password !== undefined) {
+      wanderer.passwordHash = await argon2.hash(password);
     }
     return entityManager.save(Wanderer, wanderer);
   }

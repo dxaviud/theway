@@ -14,11 +14,28 @@ type Wanderer {
   email: String!
   firstName: String!
   lastName: String!
-  age: Int!
+  username: String!
+  passwordHash: String!
 }
 
 type Mutation {
-  createWanderer(age: Int!, lastName: String!, firstName: String!, email: String!): Wanderer!
-  updateWanderer(age: Int, lastName: String, firstName: String, email: String, id: Int!): Wanderer
+  createWanderer(input: CreateInput!): Wanderer!
+  updateWanderer(input: UpdateInput!, id: Int!): Wanderer
   deleteWanderer(id: Int!): Boolean
+}
+
+input CreateInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  username: String!
+  password: String!
+}
+
+input UpdateInput {
+  email: String
+  firstName: String
+  lastName: String
+  username: String
+  password: String
 }
