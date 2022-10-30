@@ -6,7 +6,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export class Wanderer {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
-  id!: number;
+  id: number;
 
   @Field()
   @Column()
@@ -20,7 +20,11 @@ export class Wanderer {
   @Column()
   lastName: string;
 
-  @Field(() => Int)
+  @Field()
+  @Column({ unique: true })
+  username: string;
+
+  @Field()
   @Column()
-  age: number;
+  passwordHash: string;
 }

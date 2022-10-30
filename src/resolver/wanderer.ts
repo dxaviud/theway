@@ -1,9 +1,84 @@
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import argon2 from "argon2";
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  ObjectType,
+  Query,
+  Resolver,
+} from "type-graphql";
 import { Wanderer } from "../entity/Wanderer";
 import { AppContext } from "../types";
 
+@InputType()
+class CreateInput {
+  @Field()
+  email: string;
+
+  @Field()
+  firstName: string;
+
+  @Field()
+  lastName: string;
+
+  @Field()
+  username: string;
+
+  @Field()
+  password: string;
+}
+export const createInputProps = [
+  "email",
+  "firstName",
+  "lastName",
+  "username",
+  "password",
+]; // keep in sync with CreateInput
+
+@InputType()
+class UpdateInput {
+  @Field({ nullable: true })
+  email?: string;
+
+  @Field({ nullable: true })
+  firstName?: string;
+
+  @Field({ nullable: true })
+  lastName?: string;
+
+  @Field({ nullable: true })
+  username?: string;
+
+  @Field({ nullable: true })
+  password?: string;
+}
+
+@ObjectType()
+class LoginResponse {
+  @Field({ nullable: true })
+  error?: string;
+
+  @Field({ nullable: true })
+  wanderer?: Wanderer;
+}
+
 @Resolver()
 export class WandererResolver {
+  @Query(() => Wanderer, { nullable: true })
+  async me(
+    @Ctx() { entityManager, req }: AppContext
+  ): Promise<Wanderer | null> {
+    if (!req?.session.wandererId) {
+      return null;
+    }
+    return await entityManager.findOneBy(Wanderer, {
+      id: req.session.wandererId,
+    });
+  }
+
   @Query(() => [Wanderer])
   wanderers(@Ctx() { entityManager }: AppContext): Promise<Wanderer[]> {
     return entityManager.find(Wanderer);
@@ -18,29 +93,28 @@ export class WandererResolver {
   }
 
   @Mutation(() => Wanderer)
-  createWanderer(
+  async createWanderer(
     @Ctx() { entityManager }: AppContext,
-    @Arg("email") email: string,
-    @Arg("firstName") firstName: string,
-    @Arg("lastName") lastName: string,
-    @Arg("age", () => Int) age: number
+    @Arg("input")
+    { email, firstName, lastName, username, password }: CreateInput
   ): Promise<Wanderer> {
-    return entityManager.save(Wanderer, {
+    const passwordHash = await argon2.hash(password);
+    const wanderer = entityManager.create(Wanderer, {
       email,
       firstName,
       lastName,
-      age,
+      username,
+      passwordHash,
     });
+    return entityManager.save(Wanderer, wanderer);
   }
 
   @Mutation(() => Wanderer, { nullable: true })
   async updateWanderer(
     @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number,
-    @Arg("email", { nullable: true }) email?: string,
-    @Arg("firstName", { nullable: true }) firstName?: string,
-    @Arg("lastName", { nullable: true }) lastName?: string,
-    @Arg("age", () => Int, { nullable: true }) age?: number
+    @Arg("input")
+    { email, firstName, lastName, username, password }: UpdateInput
   ): Promise<Wanderer | null> {
     const wanderer = await entityManager.findOneBy(Wanderer, { id });
     if (!wanderer) {
@@ -55,8 +129,11 @@ export class WandererResolver {
     if (lastName !== undefined) {
       wanderer.lastName = lastName;
     }
-    if (age !== undefined) {
-      wanderer.age = age;
+    if (username !== undefined) {
+      wanderer.username = username;
+    }
+    if (password !== undefined) {
+      wanderer.passwordHash = await argon2.hash(password);
     }
     return entityManager.save(Wanderer, wanderer);
   }
@@ -68,5 +145,25 @@ export class WandererResolver {
   ): Promise<boolean> {
     await entityManager.delete(Wanderer, { id });
     return true;
+  }
+
+  @Mutation(() => LoginResponse)
+  async login(
+    @Ctx() { entityManager, req }: AppContext,
+    @Arg("username") username: string,
+    @Arg("password") password: string
+  ): Promise<LoginResponse> {
+    const wanderer = await entityManager.findOneBy(Wanderer, { username });
+    if (!wanderer) {
+      return { error: "wanderer with username does not exist: " + username };
+    }
+    if (!(await argon2.verify(wanderer.passwordHash, password))) {
+      return { error: "incorrect password" };
+    }
+    if (!req) {
+      throw new Error("request missing");
+    }
+    req.session.wandererId = wanderer.id;
+    return { wanderer };
   }
 }
