@@ -137,7 +137,7 @@ export class WandererResolver {
 
   @Mutation(() => LoginResponse)
   async login(
-    @Ctx() { entityManager }: AppContext,
+    @Ctx() { entityManager, req }: AppContext,
     @Arg("username") username: string,
     @Arg("password") password: string
   ): Promise<LoginResponse> {
@@ -148,6 +148,10 @@ export class WandererResolver {
     if (!(await argon2.verify(wanderer.passwordHash, password))) {
       return { error: "incorrect password" };
     }
+    if (!req) {
+      throw new Error("request missing");
+    }
+    req.session.wandererId = String(wanderer.id);
     return { wanderer };
   }
 }
