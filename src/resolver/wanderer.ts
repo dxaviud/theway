@@ -6,6 +6,7 @@ import {
   InputType,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
 } from "type-graphql";
@@ -55,6 +56,15 @@ class UpdateInput {
   password?: string;
 }
 
+@ObjectType()
+class LoginResponse {
+  @Field({ nullable: true })
+  error?: string;
+
+  @Field({ nullable: true })
+  wanderer?: Wanderer;
+}
+
 @Resolver()
 export class WandererResolver {
   @Query(() => [Wanderer])
@@ -77,13 +87,14 @@ export class WandererResolver {
     { email, firstName, lastName, username, password }: CreateInput
   ): Promise<Wanderer> {
     const passwordHash = await argon2.hash(password);
-    return entityManager.save(Wanderer, {
+    const wanderer = entityManager.create(Wanderer, {
       email,
       firstName,
       lastName,
       username,
       passwordHash,
     });
+    return entityManager.save(Wanderer, wanderer);
   }
 
   @Mutation(() => Wanderer, { nullable: true })
@@ -122,5 +133,21 @@ export class WandererResolver {
   ): Promise<boolean> {
     await entityManager.delete(Wanderer, { id });
     return true;
+  }
+
+  @Mutation(() => LoginResponse)
+  async login(
+    @Ctx() { entityManager }: AppContext,
+    @Arg("username") username: string,
+    @Arg("password") password: string
+  ): Promise<LoginResponse> {
+    const wanderer = await entityManager.findOneBy(Wanderer, { username });
+    if (!wanderer) {
+      return { error: "wanderer with username does not exist: " + username };
+    }
+    if (!(await argon2.verify(wanderer.passwordHash, password))) {
+      return { error: "incorrect password" };
+    }
+    return { wanderer };
   }
 }

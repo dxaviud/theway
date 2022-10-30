@@ -70,3 +70,20 @@ wanderer.post("/delete/:id", async (req, res) => {
   console.log("delete wanderer w/ id", req.params.id);
   res.json(await resolver.deleteWanderer(req.context, Number(req.params.id)));
 });
+
+wanderer.post("/login", async (req, res) => {
+  console.log("logging in ", req.body);
+  if (!hasProperties(req.body, ["username", "password"])) {
+    res.sendStatus(400);
+    return;
+  }
+  const loginResponse = await resolver.login(
+    req.context,
+    req.body.username,
+    req.body.password
+  );
+  if (loginResponse.error) {
+    res.status(400);
+  }
+  res.json(loginResponse);
+});
