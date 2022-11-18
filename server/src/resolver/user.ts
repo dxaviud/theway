@@ -10,6 +10,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
+import { COOKIE_NAME } from "../constants";
 import { User } from "../entity/User";
 import { AppContext } from "../types";
 
@@ -155,5 +156,21 @@ export class UserResolver {
     }
     req.session.userId = user.id;
     return { user };
+  }
+
+  @Mutation(() => Boolean!)
+  async logout(@Ctx() { req, res }: AppContext) {
+    res?.clearCookie(COOKIE_NAME);
+    return new Promise((resolve) =>
+      req?.session.destroy((err) => {
+        if (err) {
+          console.log("error destroying session", err);
+          resolve(false);
+        } else {
+          console.log("destoryed session");
+          resolve(true);
+        }
+      })
+    );
   }
 }

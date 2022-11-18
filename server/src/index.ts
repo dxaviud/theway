@@ -6,7 +6,7 @@ import session from "express-session";
 import { createClient } from "redis";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { PROD } from "./constants";
+import { COOKIE_NAME, PROD } from "./constants";
 import { AppDataSource } from "./data-source";
 import { HelloResolver } from "./resolver/hello";
 import { UserResolver } from "./resolver/user";
@@ -30,7 +30,7 @@ import { AppContext } from "./types";
   );
   app.use(
     session({
-      name: "wayid",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient as any,
         disableTouch: true,

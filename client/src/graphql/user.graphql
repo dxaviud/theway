@@ -58,3 +58,7 @@ query Me {
 query Hello {
   hello
 }
+
+mutation Logout {
+  logout
+}

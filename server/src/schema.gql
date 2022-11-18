@@ -25,6 +25,7 @@ type Mutation {
   updateUser(input: UpdateUserInput!, id: Int!): User
   deleteUser(id: Int!): Boolean
   login(password: String!, email: String!): LoginResponse!
+  logout: Boolean!
 }
 
 type RegisterResponse {
