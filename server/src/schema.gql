@@ -4,45 +4,45 @@
 # -----------------------------------------------
 
 type Query {
-  me: Wanderer
-  wanderers: [Wanderer!]!
-  wanderer(id: Int!): Wanderer
   hello: String!
+  me: User
+  users: [User!]!
+  user(id: Int!): User
 }
 
-type Wanderer {
+type User {
   id: Int!
   email: String!
-  firstName: String!
-  lastName: String!
-  username: String!
-  passwordHash: String!
+  createdDate: DateTime!
+  updatedDate: DateTime!
 }
+
+# The javascript `Date` as string. Type represents date and time as the ISO Date string.
+scalar DateTime
 
 type Mutation {
-  createWanderer(input: CreateInput!): Wanderer!
-  updateWanderer(input: UpdateInput!, id: Int!): Wanderer
-  deleteWanderer(id: Int!): Boolean
-  login(password: String!, username: String!): LoginResponse!
+  register(password: String!, email: String!): RegisterResponse!
+  updateUser(input: UpdateUserInput!, id: Int!): User
+  deleteUser(id: Int!): Boolean
+  login(password: String!, email: String!): LoginResponse!
 }
 
-input CreateInput {
-  email: String!
-  firstName: String!
-  lastName: String!
-  username: String!
-  password: String!
+type RegisterResponse {
+  errors: [FieldError!]
+  user: User
 }
 
-input UpdateInput {
+type FieldError {
+  field: String!
+  message: String!
+}
+
+input UpdateUserInput {
   email: String
-  firstName: String
-  lastName: String
-  username: String
   password: String
 }
 
 type LoginResponse {
-  error: String
-  wanderer: Wanderer
+  errors: [FieldError!]
+  user: User
 }

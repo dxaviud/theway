@@ -3,7 +3,7 @@ import { EntityManager } from "typeorm";
 
 export interface AppContext {
   entityManager: EntityManager;
-  req?: Request & { session: { wandererId?: number } };
+  req?: Request & { session: { userId?: number } };
   res?: Response;
 }
 

@@ -1,0 +1,1 @@
+Start redis in wsl using `sudo service redis-server start`
