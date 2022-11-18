@@ -4,12 +4,14 @@ import { useRouter } from "next/router";
 import React from "react";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
-import { useRegisterMutation } from "../generated/graphql";
+import { MeDocument, useRegisterMutation } from "../generated/graphql";
 
 interface RegisterProps {}
 
 const Register: React.FC<RegisterProps> = () => {
-  const [register] = useRegisterMutation();
+  const [register] = useRegisterMutation({
+    refetchQueries: [{ query: MeDocument }],
+  });
   const router = useRouter();
   return (
     <Wrapper size="small">

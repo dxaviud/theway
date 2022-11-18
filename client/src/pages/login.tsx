@@ -4,12 +4,14 @@ import { useRouter } from "next/router";
 import React from "react";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
-import { useLoginMutation } from "../generated/graphql";
+import { MeDocument, useLoginMutation } from "../generated/graphql";
 
 interface LoginProps {}
 
 const Login: React.FC<LoginProps> = () => {
-  const [login] = useLoginMutation();
+  const [login] = useLoginMutation({
+    refetchQueries: [{ query: MeDocument }],
+  });
   const router = useRouter();
   return (
     <Wrapper size="small">
