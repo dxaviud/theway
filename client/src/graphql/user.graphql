@@ -28,6 +28,19 @@ mutation Login($email: String!, $password: String!) {
   }
 }
 
+mutation Logout {
+  logout
+}
+
+query Me {
+  me {
+    id
+    email
+    createdDate
+    updatedDate
+  }
+}
+
 query Users {
   users {
     id
@@ -44,21 +57,4 @@ query User($id: Int!) {
     createdDate
     updatedDate
   }
-}
-
-query Me {
-  me {
-    id
-    email
-    createdDate
-    updatedDate
-  }
-}
-
-query Hello {
-  hello
-}
-
-mutation Logout {
-  logout
 }

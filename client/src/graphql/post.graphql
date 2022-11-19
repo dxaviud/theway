@@ -1,0 +1,43 @@
+query Posts {
+  posts {
+    id
+    title
+    content
+    createdDate
+    updatedDate
+  }
+}
+
+query Post {
+  post(id: 1) {
+    id
+    title
+    content
+    createdDate
+    updatedDate
+  }
+}
+
+mutation CreatePost($title: String!, $content: String!) {
+  createPost(title: $title, content: $content) {
+    id
+    title
+    content
+    createdDate
+    updatedDate
+  }
+}
+
+mutation UpdatePost($id: Int!, $title: String, $content: String) {
+  updatePost(id: $id, title: $title, content: $content) {
+    id
+    title
+    content
+    createdDate
+    updatedDate
+  }
+}
+
+mutation DeletePost($id: Int!) {
+  deletePost(id: $id)
+}

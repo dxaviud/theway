@@ -9,6 +9,7 @@ import { buildSchema } from "type-graphql";
 import { COOKIE_NAME, PROD } from "./constants";
 import { AppDataSource } from "./data-source";
 import { HelloResolver } from "./resolver/hello";
+import { PostResolver } from "./resolver/post";
 import { UserResolver } from "./resolver/user";
 import { AppContext } from "./types";
 
@@ -59,7 +60,7 @@ import { AppContext } from "./types";
     "/graphql",
     graphqlHTTP({
       schema: await buildSchema({
-        resolvers: [HelloResolver, UserResolver],
+        resolvers: [HelloResolver, UserResolver, PostResolver],
         emitSchemaFile: {
           path: "src/schema.gql",
           commentDescriptions: true,
