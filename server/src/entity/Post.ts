@@ -15,11 +15,11 @@ export class Post {
   id: number;
 
   @Field()
-  @Column({ type: "text" })
+  @Column()
   title: string;
 
   @Field()
-  @Column({ type: "text" })
+  @Column()
   content: string;
 
   @Field()
