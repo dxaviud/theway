@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import session from "express-session";
-import { createClient } from "redis";
+import Redis from "ioredis";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME, PROD } from "./constants";
@@ -18,10 +18,8 @@ import { AppContext } from "./types";
 
   const app = express();
 
-  // redis@v4
-  const redisClient = createClient({ legacyMode: true });
-  redisClient.on("error", console.error);
-  await redisClient.connect();
+  const redis = new Redis();
+  redis.on("error", console.error);
   const RedisStore = connectRedis(session);
   app.use(
     cors({
@@ -33,7 +31,7 @@ import { AppContext } from "./types";
     session({
       name: COOKIE_NAME,
       store: new RedisStore({
-        client: redisClient as any,
+        client: redis as any,
         disableTouch: true,
       }),
       saveUninitialized: false,
@@ -49,11 +47,11 @@ import { AppContext } from "./types";
   );
   const context: AppContext = {
     entityManager: AppDataSource.manager,
+    redis,
   };
   app.use((req, res, next) => {
     context.req = req;
     context.res = res;
-    req.context = context;
     next();
   });
   app.use(

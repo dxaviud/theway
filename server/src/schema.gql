@@ -34,14 +34,16 @@ type Mutation {
   createPost(content: String!, title: String!): Post!
   updatePost(content: String, title: String, id: Int!): Post
   deletePost(id: Int!): Boolean!
-  register(password: String!, email: String!): RegisterResponse!
+  changePassword(newPassword: String!, token: String!): UserResponse!
+  forgotPassword(email: String!): Boolean!
+  register(password: String!, email: String!): UserResponse!
   updateUser(input: UpdateUserInput!, id: Int!): User
   deleteUser(id: Int!): Boolean
-  login(password: String!, email: String!): LoginResponse!
+  login(password: String!, email: String!): UserResponse!
   logout: Boolean!
 }
 
-type RegisterResponse {
+type UserResponse {
   errors: [FieldError!]
   user: User
 }
@@ -54,9 +56,4 @@ type FieldError {
 input UpdateUserInput {
   email: String
   password: String
-}
-
-type LoginResponse {
-  errors: [FieldError!]
-  user: User
 }

@@ -58,3 +58,22 @@ query User($id: Int!) {
     updatedDate
   }
 }
+
+mutation ForgotPassword($email: String!) {
+  forgotPassword(email: $email)
+}
+
+mutation ChangePassword($token: String!, $newPassword: String!) {
+  changePassword(token: $token, newPassword: $newPassword) {
+    errors {
+      field
+      message
+    }
+    user {
+      id
+      email
+      createdDate
+      updatedDate
+    }
+  }
+}

@@ -10,9 +10,12 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { COOKIE_NAME } from "../constants";
+import { v4 } from "uuid";
+import isEmail from "validator/lib/isEmail";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { User } from "../entity/User";
 import { AppContext } from "../types";
+import { sendEmail } from "../util/sendEmail";
 
 @InputType()
 class UpdateUserInput {
@@ -33,16 +36,7 @@ class FieldError {
 }
 
 @ObjectType()
-class RegisterResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-
-  @Field({ nullable: true })
-  user?: User;
-}
-
-@ObjectType()
-class LoginResponse {
+class UserResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
@@ -52,6 +46,64 @@ class LoginResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Ctx() { entityManager, redis, req }: AppContext,
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string
+  ): Promise<UserResponse> {
+    console.log("changePassword", { token, newPassword });
+    if (newPassword.length < 3) {
+      return {
+        errors: [{ field: "newPassword", message: "password too short" }],
+      };
+    }
+    const key = FORGOT_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
+    if (!userId) {
+      return { errors: [{ field: "token", message: "token expired" }] };
+    }
+    const user = await entityManager.findOneBy(User, { id: Number(userId) });
+    if (!user) {
+      return { errors: [{ field: "token", message: "user no longer exists" }] };
+    }
+    user.passwordHash = await argon2.hash(newPassword);
+    await entityManager.save(user);
+
+    await redis.del(key);
+
+    if (!req) {
+      throw new Error("request missing");
+    }
+    req.session.userId = user.id;
+    return { user };
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Ctx() { entityManager, redis }: AppContext,
+    @Arg("email") email: string
+  ): Promise<boolean> {
+    const user = await entityManager.findOneBy(User, { email });
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+    await redis.set(
+      FORGOT_PASSWORD_PREFIX + token,
+      user.id,
+      "EX",
+      1000 * 60 * 60
+    );
+
+    sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">Click to reset password</a>`
+    );
+    return true;
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { entityManager, req }: AppContext): Promise<User | null> {
     if (!req?.session.userId) {
@@ -75,20 +127,20 @@ export class UserResolver {
     return entityManager.findOneBy(User, { id });
   }
 
-  @Mutation(() => RegisterResponse)
+  @Mutation(() => UserResponse)
   async register(
     @Ctx() { entityManager, req }: AppContext,
     @Arg("email") email: string,
     @Arg("password") password: string
-  ): Promise<RegisterResponse> {
+  ): Promise<UserResponse> {
     console.log("register", { email, password });
     const errors: FieldError[] = [];
     if (email.length < 3) {
       errors.push({ field: "email", message: "email too short" });
-    } else {
-      if (await entityManager.findOneBy(User, { email })) {
-        errors.push({ field: "email", message: "email already taken" });
-      }
+    } else if (!isEmail(email)) {
+      errors.push({ field: "email", message: "email is invalid" });
+    } else if (await entityManager.findOneBy(User, { email })) {
+      errors.push({ field: "email", message: "email already taken" });
     }
     if (password.length < 3) {
       errors.push({ field: "password", message: "password too short" });
@@ -101,7 +153,7 @@ export class UserResolver {
       email,
       passwordHash,
     });
-    await entityManager.save(User, user);
+    await entityManager.save(user);
     if (!req) {
       throw new Error("request missing");
     }
@@ -126,7 +178,7 @@ export class UserResolver {
     if (password !== undefined) {
       user.passwordHash = await argon2.hash(password);
     }
-    return entityManager.save(User, user);
+    return entityManager.save(user);
   }
 
   @Mutation(() => Boolean, { nullable: true })
@@ -138,12 +190,12 @@ export class UserResolver {
     return true;
   }
 
-  @Mutation(() => LoginResponse)
+  @Mutation(() => UserResponse)
   async login(
     @Ctx() { entityManager, req }: AppContext,
     @Arg("email") email: string,
     @Arg("password") password: string
-  ): Promise<LoginResponse> {
+  ): Promise<UserResponse> {
     const user = await entityManager.findOneBy(User, { email });
     if (!user) {
       return { errors: [{ field: "email", message: "email not found" }] };
