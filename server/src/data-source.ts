@@ -1,6 +1,8 @@
 import { DataSource } from "typeorm";
+import { PROD } from "./constants";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
+import { migration1670186183521 } from "./migration/1670186183521-migration";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -9,9 +11,9 @@ export const AppDataSource = new DataSource({
   username: "postgres",
   password: "postgres",
   database: "theway",
-  synchronize: true,
-  logging: true,
+  synchronize: !PROD,
+  logging: !PROD,
   entities: [User, Post],
-  migrations: [],
+  migrations: [migration1670186183521],
   subscribers: [],
 });

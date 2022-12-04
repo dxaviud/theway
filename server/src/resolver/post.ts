@@ -1,5 +1,14 @@
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from "type-graphql";
 import { Post } from "../entity/Post";
+import { isAuthenticated } from "../middleware/isAuthenticated";
 import { AppContext } from "../types";
 
 @Resolver()
@@ -18,8 +27,9 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
+  @UseMiddleware(isAuthenticated)
   async createPost(
-    @Ctx() { entityManager }: AppContext,
+    @Ctx() { entityManager, req }: AppContext,
     @Arg("title") title: string,
     @Arg("content") content: string
   ) {
@@ -41,6 +51,7 @@ export class PostResolver {
     const post = entityManager.create(Post, {
       title,
       content,
+      creatorId: req!.session.userId!, // checked by isAuthenticated middleware
     });
     await entityManager.save(Post, post);
     return post;

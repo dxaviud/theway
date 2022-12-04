@@ -15,6 +15,7 @@ import { AppContext } from "./types";
 
 (async () => {
   await AppDataSource.initialize();
+  await AppDataSource.runMigrations();
 
   const app = express();
 

@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, Link } from "@chakra-ui/react";
+import { Box, Button, Flex, FormControl } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -31,7 +31,11 @@ const Login: React.FC<LoginProps> = () => {
               setFieldError(field, message);
             }
           } else {
-            router.push("/");
+            if (typeof router.query.next === "string") {
+              router.push(router.query.next);
+            } else {
+              router.push("/");
+            }
           }
         }}
       >
@@ -45,9 +49,7 @@ const Login: React.FC<LoginProps> = () => {
             </FormControl>
             <Flex>
               <Box ml="auto">
-                <NextLink href="/forgot-password">
-                  <Link>Forgot password?</Link>
-                </NextLink>
+                <NextLink href="/forgot-password">Forgot password?</NextLink>
               </Box>
             </Flex>
             <Button

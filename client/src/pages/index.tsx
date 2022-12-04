@@ -1,73 +1,41 @@
-import { CheckCircleIcon, LinkIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Code,
-  Link as ChakraLink,
-  List,
-  ListIcon,
-  ListItem,
-  Text,
-} from "@chakra-ui/react";
+import { Link, List, ListItem, Text } from "@chakra-ui/react";
 
+import NextLink from "next/link";
 import { Container } from "../components/Container";
 import { CTA } from "../components/CTA";
 import { DarkModeSwitch } from "../components/DarkModeSwitch";
 import { Footer } from "../components/Footer";
 import { Hero } from "../components/Hero";
 import { Main } from "../components/Main";
-import { NavBar } from "../components/NavBar";
-import { usePostsQuery } from "../generated/graphql";
 
 const Index = () => {
-  const { data } = usePostsQuery();
   return (
     <>
-      <NavBar />
+      {/* <NavBar /> */}
       <Container height="100vh">
-        {!data
-          ? null
-          : data.posts.map((post) => (
-              <Box key={post.id} mt={2}>
-                <div>{post.title}</div>
-                <div>{post.content}</div>
-              </Box>
-            ))}
-        <Hero />
+        <Hero title="The Way" />
         <Main>
-          <Text color="text">
-            Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code>{" "}
-            + <Code>TypeScript</Code>.
-          </Text>
-
-          <List spacing={3} my={0} color="text">
+          <List my={0} color="text">
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <ChakraLink
-                isExternal
-                href="https://chakra-ui.com"
-                flexGrow={1}
-                mr={2}
-              >
-                Chakra UI <LinkIcon />
-              </ChakraLink>
+              <NextLink href="/posts">Posts</NextLink>
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <ChakraLink
-                isExternal
-                href="https://nextjs.org"
-                flexGrow={1}
-                mr={2}
-              >
-                Next.js <LinkIcon />
-              </ChakraLink>
+              <NextLink href="/create-post">Create Post</NextLink>
             </ListItem>
           </List>
         </Main>
 
         <DarkModeSwitch />
         <Footer>
-          <Text>Next ❤️ Chakra</Text>
+          <Text color="text">
+            <Link isExternal href="https://nextjs.org" flexGrow={1} mr={2}>
+              Next.js
+            </Link>
+            ❤️{" "}
+            <Link isExternal href="https://chakra-ui.com" flexGrow={1} mr={2}>
+              Chakra UI
+            </Link>
+          </Text>
         </Footer>
         <CTA />
       </Container>

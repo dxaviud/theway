@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Post } from "./Post";
 
 @ObjectType()
 @Entity()
@@ -20,6 +22,9 @@ export class User {
 
   @Column()
   passwordHash: string;
+
+  @OneToMany(() => Post, (post) => post.creator)
+  posts: Post[];
 
   @Field()
   @CreateDateColumn()

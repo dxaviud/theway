@@ -16,6 +16,8 @@ type Post {
   id: Int!
   title: String!
   content: String!
+  flow: Int!
+  creatorId: Float!
   createdDate: DateTime!
   updatedDate: DateTime!
 }
