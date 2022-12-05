@@ -18,12 +18,10 @@ type Post {
   content: String!
   flow: Int!
   creatorId: Float!
+  creator: User!
   createdDate: DateTime!
   updatedDate: DateTime!
 }
-
-# The javascript `Date` as string. Type represents date and time as the ISO Date string.
-scalar DateTime
 
 type User {
   id: Int!
@@ -31,6 +29,9 @@ type User {
   createdDate: DateTime!
   updatedDate: DateTime!
 }
+
+# The javascript `Date` as string. Type represents date and time as the ISO Date string.
+scalar DateTime
 
 type Mutation {
   createPost(content: String!, title: String!): Post!

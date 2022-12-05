@@ -15,7 +15,17 @@ import { AppContext } from "../types";
 export class PostResolver {
   @Query(() => [Post])
   posts(@Ctx() { entityManager }: AppContext): Promise<Post[]> {
-    return entityManager.find(Post);
+    return entityManager.query(`
+    SELECT p.*, 
+    json_build_object(
+      'id', u.id,
+      'email', u.email,
+      'createdDate', u."createdDate",
+      'updatedDate', u."updatedDate"
+    ) creator
+    FROM post p
+    INNER JOIN public.user u on u.id = p."creatorId"
+    `);
   }
 
   @Query(() => Post, { nullable: true })
