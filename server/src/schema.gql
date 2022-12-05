@@ -21,6 +21,7 @@ type Post {
   creator: User!
   createdDate: DateTime!
   updatedDate: DateTime!
+  contentSnippet: String!
 }
 
 type User {

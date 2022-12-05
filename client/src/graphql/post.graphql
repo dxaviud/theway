@@ -2,7 +2,7 @@ query Posts {
   posts {
     id
     title
-    content
+    contentSnippet
     createdDate
     updatedDate
   }

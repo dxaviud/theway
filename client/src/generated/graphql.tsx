@@ -91,7 +91,11 @@ export type MutationUpdateUserArgs = {
 export type Post = {
   __typename?: 'Post';
   content: Scalars['String'];
+  contentSnippet: Scalars['String'];
   createdDate: Scalars['DateTime'];
+  creator: User;
+  creatorId: Scalars['Float'];
+  flow: Scalars['Int'];
   id: Scalars['Int'];
   title: Scalars['String'];
   updatedDate: Scalars['DateTime'];
@@ -144,7 +148,7 @@ export type HelloQuery = { __typename?: 'Query', hello: string };
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, content: string, createdDate: any, updatedDate: any }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, contentSnippet: string, createdDate: any, updatedDate: any }> };
 
 export type PostQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -266,7 +270,7 @@ export const PostsDocument = gql`
   posts {
     id
     title
-    content
+    contentSnippet
     createdDate
     updatedDate
   }

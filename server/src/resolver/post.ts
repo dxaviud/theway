@@ -1,18 +1,28 @@
 import {
   Arg,
   Ctx,
+  FieldResolver,
   Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { Post } from "../entity/Post";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 import { AppContext } from "../types";
 
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  contentSnippet(@Root() post: Post) {
+    if (post.content.length <= 100) {
+      return post.content;
+    }
+    return post.content.slice(0, 100) + "...";
+  }
+
   @Query(() => [Post])
   posts(@Ctx() { entityManager }: AppContext): Promise<Post[]> {
     return entityManager.query(`

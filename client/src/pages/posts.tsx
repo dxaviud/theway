@@ -17,7 +17,7 @@ const Posts = () => {
             data.posts.map((post) => (
               <Box key={post.id} mt={2} p={5} shadow="md" borderWidth="1px">
                 <Heading fontSize="xl">{post.title}</Heading>
-                <Text mt={4}>{post.content}</Text>
+                <Text mt={4}>{post.contentSnippet}</Text>
               </Box>
             ))
           )}
