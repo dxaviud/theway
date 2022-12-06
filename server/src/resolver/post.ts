@@ -35,6 +35,7 @@ export class PostResolver {
     ) creator
     FROM post p
     INNER JOIN public.user u on u.id = p."creatorId"
+    ORDER BY p."createdDate" DESC
     `);
   }
 

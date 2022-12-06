@@ -4,7 +4,11 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
-import { useCreatePostMutation, useMeQuery } from "../generated/graphql";
+import {
+  PostsDocument,
+  useCreatePostMutation,
+  useMeQuery,
+} from "../generated/graphql";
 
 interface CreatePostProps {}
 
@@ -16,7 +20,9 @@ const CreatePost: React.FC<CreatePostProps> = ({}) => {
       router.replace("/login?next=" + router.pathname);
     }
   }, [data, loading, router]);
-  const [createPost] = useCreatePostMutation();
+  const [createPost] = useCreatePostMutation({
+    refetchQueries: [{ query: PostsDocument }],
+  });
   return (
     <Wrapper size="small">
       <Formik
@@ -36,7 +42,7 @@ const CreatePost: React.FC<CreatePostProps> = ({}) => {
           //   }
           // } else {
           // }
-          router.push("/");
+          router.push("/posts");
         }}
       >
         {({ isSubmitting }) => (
