@@ -3,6 +3,7 @@ query Posts {
     id
     title
     contentSnippet
+    flow
     createdDate
     updatedDate
   }
@@ -40,4 +41,8 @@ mutation UpdatePost($id: Int!, $title: String, $content: String) {
 
 mutation DeletePost($id: Int!) {
   deletePost(id: $id)
+}
+
+mutation Vote($flow: Int!, $postId: Int!) {
+  vote(flow: $flow, postId: $postId)
 }

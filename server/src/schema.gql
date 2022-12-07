@@ -35,6 +35,7 @@ type User {
 scalar DateTime
 
 type Mutation {
+  vote(flow: Int!, postId: Int!): Boolean!
   createPost(content: String!, title: String!): Post!
   updatePost(content: String, title: String, id: Int!): Post
   deletePost(id: Int!): Boolean!

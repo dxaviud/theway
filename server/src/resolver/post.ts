@@ -10,6 +10,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { Post } from "../entity/Post";
+import { Vote } from "../entity/Vote";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 import { AppContext } from "../types";
 
@@ -23,19 +24,77 @@ export class PostResolver {
     return post.content.slice(0, 100) + "...";
   }
 
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuthenticated)
+  async vote(
+    @Ctx() { entityManager, req }: AppContext,
+    @Arg("postId", () => Int) postId: number,
+    @Arg("flow", () => Int) flow: number
+  ) {
+    const { userId } = req!.session;
+    flow = flow > 0 ? 1 : -1;
+    const vote = await entityManager.findOne(Vote, {
+      where: { userId: userId!, postId },
+    });
+    if (vote) {
+      if (vote.flow == flow) {
+        // undo the vote
+        entityManager.transaction(async (em) => {
+          await em.remove(vote);
+          await em.query(
+            `
+UPDATE post
+SET flow = flow - $1 
+WHERE id = $2
+          `,
+            [flow, postId]
+          );
+        });
+      } else {
+        // change the vote
+        entityManager.transaction(async (em) => {
+          vote.flow = flow;
+          await em.save(vote);
+          await em.query(
+            `
+UPDATE post
+SET flow = flow + $1 
+WHERE id = $2
+          `,
+            [2 * flow, postId]
+          );
+        });
+      }
+    } else {
+      await entityManager.query(`
+START TRANSACTION;
+
+INSERT INTO vote ("userId", "postId", flow)
+VALUES (${userId}, ${postId}, ${flow});
+
+UPDATE post
+SET flow = flow + ${flow}
+WHERE id = ${postId};
+
+COMMIT;
+    `);
+    }
+    return true;
+  }
+
   @Query(() => [Post])
   posts(@Ctx() { entityManager }: AppContext): Promise<Post[]> {
     return entityManager.query(`
-    SELECT p.*, 
-    json_build_object(
-      'id', u.id,
-      'email', u.email,
-      'createdDate', u."createdDate",
-      'updatedDate', u."updatedDate"
-    ) creator
-    FROM post p
-    INNER JOIN public.user u on u.id = p."creatorId"
-    ORDER BY p."createdDate" DESC
+SELECT p.*, 
+json_build_object(
+  'id', u.id,
+  'email', u.email,
+  'createdDate', u."createdDate",
+  'updatedDate', u."updatedDate"
+) creator
+FROM post p
+INNER JOIN public.user u on u.id = p."creatorId"
+ORDER BY p."createdDate" DESC
     `);
   }
 
