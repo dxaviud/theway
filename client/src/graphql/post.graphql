@@ -4,6 +4,7 @@ query Posts {
     title
     contentSnippet
     flow
+    voteFlow
     createdDate
     updatedDate
   }

@@ -42,6 +42,7 @@ const Posts = () => {
                     isLoading={
                       loading && vars!.flow === 1 && vars!.postId == post.id
                     }
+                    colorScheme={post.voteFlow === 1 ? "green" : undefined}
                     aria-label="upflow post"
                     icon={<ChevronUpIcon />}
                   ></IconButton>
@@ -60,6 +61,7 @@ const Posts = () => {
                     isLoading={
                       loading && vars!.flow === -1 && vars!.postId == post.id
                     }
+                    colorScheme={post.voteFlow === -1 ? "red" : undefined}
                     aria-label="downflow post"
                     icon={<ChevronDownIcon />}
                   ></IconButton>

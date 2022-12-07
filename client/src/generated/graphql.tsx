@@ -106,6 +106,7 @@ export type Post = {
   id: Scalars['Int'];
   title: Scalars['String'];
   updatedDate: Scalars['DateTime'];
+  voteFlow?: Maybe<Scalars['Int']>;
 };
 
 export type Query = {
@@ -155,7 +156,7 @@ export type HelloQuery = { __typename?: 'Query', hello: string };
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, contentSnippet: string, flow: number, createdDate: any, updatedDate: any }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, contentSnippet: string, flow: number, voteFlow?: number | null, createdDate: any, updatedDate: any }> };
 
 export type PostQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -287,6 +288,7 @@ export const PostsDocument = gql`
     title
     contentSnippet
     flow
+    voteFlow
     createdDate
     updatedDate
   }

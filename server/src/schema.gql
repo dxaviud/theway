@@ -17,6 +17,7 @@ type Post {
   title: String!
   content: String!
   flow: Int!
+  voteFlow: Int
   creatorId: Float!
   creator: User!
   createdDate: DateTime!

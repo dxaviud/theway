@@ -30,6 +30,9 @@ export class Post {
   @Column({ default: 0 })
   flow: number;
 
+  @Field(() => Int, { nullable: true })
+  voteFlow: number | null;
+
   @Field()
   @Column()
   creatorId: number;

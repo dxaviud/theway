@@ -83,7 +83,7 @@ COMMIT;
   }
 
   @Query(() => [Post])
-  posts(@Ctx() { entityManager }: AppContext): Promise<Post[]> {
+  posts(@Ctx() { entityManager, req }: AppContext): Promise<Post[]> {
     return entityManager.query(`
 SELECT p.*, 
 json_build_object(
@@ -91,7 +91,14 @@ json_build_object(
   'email', u.email,
   'createdDate', u."createdDate",
   'updatedDate', u."updatedDate"
-) creator
+) creator,
+${
+  req!.session.userId
+    ? `(SELECT flow FROM vote WHERE "userId"= ${
+        req!.session.userId
+      } AND "postId" = p.id) "voteFlow"`
+    : 'null as "voteFlow"'
+}
 FROM post p
 INNER JOIN public.user u on u.id = p."creatorId"
 ORDER BY p."createdDate" DESC
