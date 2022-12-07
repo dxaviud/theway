@@ -5,6 +5,7 @@ import { useState } from "react";
 import { NavBar } from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
 import {
+  PostsDocument,
   usePostsQuery,
   useVoteMutation,
   VoteMutationVariables,
@@ -12,7 +13,9 @@ import {
 
 const Posts = () => {
   const { data } = usePostsQuery();
-  const [vote, { loading }] = useVoteMutation();
+  const [vote, { loading }] = useVoteMutation({
+    refetchQueries: [{ query: PostsDocument }],
+  });
   const [vars, setVars] = useState<VoteMutationVariables>();
   return (
     <>
