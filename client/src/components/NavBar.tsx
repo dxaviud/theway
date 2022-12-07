@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
+import { Box, Button, Flex } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
@@ -15,14 +15,17 @@ export const NavBar: React.FC<NavBarProps> = () => {
   } else if (data?.me) {
     body = (
       <Flex>
-        <Box mr={2}>{data.me.email}</Box>
+        <Flex alignItems="center" mr={2}>
+          {data.me.email}
+        </Flex>
         <Button
           onClick={() => {
             logout();
             router.reload();
           }}
           isLoading={logoutLoading}
-          variant="link"
+          colorScheme="blackAlpha"
+          // variant="link"
         >
           Logout
         </Button>
@@ -31,12 +34,14 @@ export const NavBar: React.FC<NavBarProps> = () => {
   } else {
     body = (
       <>
-        <NextLink href="/login">
-          <Link mr={2}>Login</Link>
-        </NextLink>
-        <NextLink href="/register">
-          <Link>Register</Link>
-        </NextLink>
+        <Button as={NextLink} href="/login" colorScheme="blackAlpha">
+          Login
+        </Button>
+        {/* <NextLink href="/login">Login</NextLink> */}
+        <Button as={NextLink} href="/register" colorScheme="blackAlpha">
+          Register
+        </Button>
+        {/* <NextLink href="/register">Register</NextLink> */}
       </>
     );
   }
