@@ -219,7 +219,7 @@ export class UserResolver {
           console.log("error destroying session", err);
           resolve(false);
         } else {
-          console.log("destoryed session");
+          console.log("destroyed session");
           resolve(true);
         }
       })

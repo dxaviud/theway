@@ -110,7 +110,10 @@ ORDER BY p."createdDate" DESC
     @Ctx() { entityManager }: AppContext,
     @Arg("id", () => Int) id: number
   ): Promise<Post | null> {
-    return entityManager.findOneBy(Post, { id });
+    return entityManager.findOne(Post, {
+      relations: ["creator"],
+      where: { id },
+    });
   }
 
   @Mutation(() => Post)
@@ -119,22 +122,7 @@ ORDER BY p."createdDate" DESC
     @Ctx() { entityManager, req }: AppContext,
     @Arg("title") title: string,
     @Arg("content") content: string
-  ) {
-    console.log("createPost", { title, content });
-    // const errors: FieldError[] = [];
-    // if (title.length < 3) {
-    //   errors.push({ field: "email", message: "email too short" });
-    // } else {
-    //   if (await entityManager.findOneBy(Post, { email })) {
-    //     errors.push({ field: "email", message: "email already taken" });
-    //   }
-    // }
-    // if (password.length < 3) {
-    //   errors.push({ field: "password", message: "password too short" });
-    // }
-    // if (errors.length > 0) {
-    //   return { errors };
-    // }
+  ): Promise<Post> {
     const post = entityManager.create(Post, {
       title,
       content,
@@ -145,14 +133,19 @@ ORDER BY p."createdDate" DESC
   }
 
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isAuthenticated)
   async updatePost(
-    @Ctx() { entityManager }: AppContext,
+    @Ctx() { entityManager, req }: AppContext,
     @Arg("id", () => Int) id: number,
     @Arg("title", { nullable: true }) title?: string,
     @Arg("content", { nullable: true }) content?: string
   ): Promise<Post | null> {
-    console.log("updatePost", { title, content });
-    const post = await entityManager.findOneBy(Post, { id });
+    const post = await entityManager.findOne(Post, {
+      where: {
+        id,
+        creatorId: req!.session.userId!,
+      },
+    });
     if (!post) {
       return null;
     }
@@ -166,11 +159,17 @@ ORDER BY p."createdDate" DESC
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuthenticated)
   async deletePost(
-    @Ctx() { entityManager }: AppContext,
+    @Ctx() { entityManager, req }: AppContext,
     @Arg("id", () => Int) id: number
   ): Promise<boolean> {
-    await entityManager.delete(Post, { id });
+    const post = await entityManager.findOneBy(Post, { id });
+    if (!post || post.creatorId !== req?.session.userId) {
+      return false;
+    }
+    await entityManager.delete(Vote, { postId: id });
+    await entityManager.delete(Post, { id, creatorId: req.session.userId });
     return true;
   }
 }

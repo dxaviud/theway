@@ -156,12 +156,14 @@ export type HelloQuery = { __typename?: 'Query', hello: string };
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, contentSnippet: string, flow: number, voteFlow?: number | null, createdDate: any, updatedDate: any }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, contentSnippet: string, flow: number, voteFlow?: number | null, creatorId: number, createdDate: any, updatedDate: any, creator: { __typename?: 'User', email: string } }> };
 
-export type PostQueryVariables = Exact<{ [key: string]: never; }>;
+export type PostQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, content: string, createdDate: any, updatedDate: any } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, content: string, flow: number, voteFlow?: number | null, createdDate: any, updatedDate: any, creator: { __typename?: 'User', email: string } } | null };
 
 export type CreatePostMutationVariables = Exact<{
   title: Scalars['String'];
@@ -289,6 +291,10 @@ export const PostsDocument = gql`
     contentSnippet
     flow
     voteFlow
+    creatorId
+    creator {
+      email
+    }
     createdDate
     updatedDate
   }
@@ -322,11 +328,16 @@ export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const PostDocument = gql`
-    query Post {
-  post(id: 1) {
+    query Post($id: Int!) {
+  post(id: $id) {
     id
     title
     content
+    flow
+    voteFlow
+    creator {
+      email
+    }
     createdDate
     updatedDate
   }
@@ -345,10 +356,11 @@ export const PostDocument = gql`
  * @example
  * const { data, loading, error } = usePostQuery({
  *   variables: {
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function usePostQuery(baseOptions?: Apollo.QueryHookOptions<PostQuery, PostQueryVariables>) {
+export function usePostQuery(baseOptions: Apollo.QueryHookOptions<PostQuery, PostQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<PostQuery, PostQueryVariables>(PostDocument, options);
       }

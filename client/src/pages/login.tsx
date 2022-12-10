@@ -29,6 +29,7 @@ const Login: React.FC<LoginProps> = () => {
               password,
             },
           });
+          console.log("result", result);
           const errors = result.data?.login.errors;
           if (errors) {
             for (const { field, message } of errors) {
@@ -36,6 +37,7 @@ const Login: React.FC<LoginProps> = () => {
             }
           } else {
             if (typeof router.query.next === "string") {
+              console.log(router.query.next);
               router.push(router.query.next);
             } else {
               router.push("/");

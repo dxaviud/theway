@@ -27,7 +27,7 @@ export const CTA = () => {
         mx={2}
         width="full"
       >
-        Logout
+        Logout {data.me.email}
       </Button>
     );
   } else {

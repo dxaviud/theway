@@ -1,13 +1,19 @@
-import { Box, Button, Flex } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useLogoutMutation, useMeQuery } from "../generated/graphql";
+import {
+  MeDocument,
+  useLogoutMutation,
+  useMeQuery,
+} from "../generated/graphql";
 
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = () => {
   const router = useRouter();
-  const [logout, { loading: logoutLoading }] = useLogoutMutation();
+  const [logout, { loading: logoutLoading }] = useLogoutMutation({
+    refetchQueries: [{ query: MeDocument }],
+  });
   const { data, loading } = useMeQuery();
   let body;
   if (loading) {
@@ -15,17 +21,16 @@ export const NavBar: React.FC<NavBarProps> = () => {
   } else if (data?.me) {
     body = (
       <Flex>
-        <Flex alignItems="center" mr={2}>
+        <Flex alignItems="center" mr={4}>
           {data.me.email}
         </Flex>
         <Button
-          onClick={() => {
-            logout();
-            router.reload();
+          onClick={async () => {
+            await logout();
+            router.push("/");
           }}
           isLoading={logoutLoading}
-          colorScheme="blackAlpha"
-          // variant="link"
+          colorScheme="green"
         >
           Logout
         </Button>
@@ -34,20 +39,28 @@ export const NavBar: React.FC<NavBarProps> = () => {
   } else {
     body = (
       <>
-        <Button as={NextLink} href="/login" colorScheme="blackAlpha">
+        <Button as={NextLink} href="/login" colorScheme="green" mr={4}>
           Login
         </Button>
-        {/* <NextLink href="/login">Login</NextLink> */}
-        <Button as={NextLink} href="/register" colorScheme="blackAlpha">
+        <Button as={NextLink} href="/register" colorScheme="green">
           Register
         </Button>
-        {/* <NextLink href="/register">Register</NextLink> */}
       </>
     );
   }
   return (
-    <Flex color="black" bgColor="green.200" p={4}>
-      <Box mr="auto">{body}</Box>
+    <Flex color="white" bgColor="black" p={4}>
+      <Flex flex={1}>
+        <NextLink href="/">
+          <Heading
+            bgGradient="linear(to-l, heroGradientStart, heroGradientEnd)"
+            bgClip="text"
+          >
+            The Way
+          </Heading>
+        </NextLink>
+        <Box ml="auto">{body}</Box>
+      </Flex>
     </Flex>
   );
 };

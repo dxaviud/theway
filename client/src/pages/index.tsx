@@ -1,4 +1,4 @@
-import { Link, List, ListItem, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Link, Text } from "@chakra-ui/react";
 
 import NextLink from "next/link";
 import { Container } from "../components/Container";
@@ -15,14 +15,18 @@ const Index = () => {
       <Container height="100vh">
         <Hero title="The Way" />
         <Main>
-          <List my={0} color="text">
-            <ListItem>
-              <NextLink href="/posts">Posts</NextLink>
-            </ListItem>
-            <ListItem>
-              <NextLink href="/create-post">Create Post</NextLink>
-            </ListItem>
-          </List>
+          <Flex justifyContent="center" my={0} color="text">
+            <Box mr={4}>
+              <Button as={NextLink} href="/posts">
+                Posts
+              </Button>
+            </Box>
+            <Box>
+              <Button as={NextLink} href="/create-post">
+                Create Post
+              </Button>
+            </Box>
+          </Flex>
         </Main>
 
         <DarkModeSwitch />

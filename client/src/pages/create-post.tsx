@@ -1,8 +1,9 @@
 import { Box, Button, FormControl } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
 import { InputField } from "../components/InputField";
+import { NavBar } from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
 import {
   PostsDocument,
@@ -13,35 +14,30 @@ import {
 interface CreatePostProps {}
 
 const CreatePost: React.FC<CreatePostProps> = ({}) => {
-  const { data, loading } = useMeQuery();
-  const router = useRouter();
-  useEffect(() => {
-    if (!loading && !data?.me) {
-      router.replace("/login?next=" + router.pathname);
-    }
-  }, [data, loading, router]);
+  const { data, loading } = useMeQuery({
+    fetchPolicy: "network-only",
+  });
   const [createPost] = useCreatePostMutation({
     refetchQueries: [{ query: PostsDocument }],
   });
-  return (
-    <Wrapper size="small">
+  const router = useRouter();
+
+  let body = null;
+  if (loading) {
+    body = <Box>Loading...</Box>;
+  } else if (!data || !data.me) {
+    router.replace("/login?next=" + router.pathname);
+  } else {
+    body = (
       <Formik
         initialValues={{ title: "", content: "" }}
-        onSubmit={async ({ title, content }, { setFieldError }) => {
-          const result = await createPost({
+        onSubmit={async ({ title, content }) => {
+          await createPost({
             variables: {
               title,
               content,
             },
           });
-          console.log(result);
-          // const errors = result.data?.createPost.errors;
-          // if (errors) {
-          //   for (const { field, message } of errors) {
-          //     setFieldError(field, message);
-          //   }
-          // } else {
-          // }
           router.push("/posts");
         }}
       >
@@ -64,7 +60,13 @@ const CreatePost: React.FC<CreatePostProps> = ({}) => {
           </Form>
         )}
       </Formik>
-    </Wrapper>
+    );
+  }
+  return (
+    <>
+      <NavBar />
+      <Wrapper size="small">{body}</Wrapper>
+    </>
   );
 };
 

@@ -1,78 +1,57 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, Flex, Heading, IconButton, Stack, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Flex, Stack } from "@chakra-ui/react";
 
 import { NavBar } from "../components/NavBar";
+import { PostButtons } from "../components/PostButtons";
+import { PostContent } from "../components/PostContent";
+import { Voter } from "../components/Voter";
 import { Wrapper } from "../components/Wrapper";
-import {
-  PostsDocument,
-  usePostsQuery,
-  useVoteMutation,
-  VoteMutationVariables,
-} from "../generated/graphql";
+import { usePostsQuery } from "../generated/graphql";
 
 const Posts = () => {
-  const { data } = usePostsQuery();
-  const [vote, { loading }] = useVoteMutation({
-    refetchQueries: [{ query: PostsDocument }],
+  const { data: postsData, loading: postsLoading } = usePostsQuery({
+    fetchPolicy: "no-cache",
   });
-  const [vars, setVars] = useState<VoteMutationVariables>();
+  if (postsLoading) {
+    return (
+      <>
+        <NavBar />
+        <Wrapper>
+          <Box>Loading...</Box>
+        </Wrapper>
+      </>
+    );
+  }
+  if (!postsData) {
+    return (
+      <>
+        <NavBar />
+        <Wrapper>
+          <Stack spacing={8}>
+            <Box>No posts.</Box>
+          </Stack>
+        </Wrapper>
+      </>
+    );
+  }
   return (
     <>
       <NavBar />
       <Wrapper>
         <Stack spacing={8}>
-          {!data ? (
-            <div>Loading...</div>
-          ) : (
-            data.posts.map((post) => (
-              <Flex key={post.id} mt={2} p={5} shadow="md" borderWidth="1px">
-                <Flex direction="column" alignItems="center" mr={4}>
-                  <IconButton
-                    onClick={async () => {
-                      const variables = {
-                        postId: post.id,
-                        flow: 1,
-                      };
-                      setVars(variables);
-                      await vote({
-                        variables,
-                      });
-                    }}
-                    isLoading={
-                      loading && vars!.flow === 1 && vars!.postId == post.id
-                    }
-                    colorScheme={post.voteFlow === 1 ? "green" : undefined}
-                    aria-label="upflow post"
-                    icon={<ChevronUpIcon />}
-                  ></IconButton>
-                  {post.flow}
-                  <IconButton
-                    onClick={async () => {
-                      const variables = {
-                        postId: post.id,
-                        flow: -1,
-                      };
-                      setVars(variables);
-                      await vote({
-                        variables,
-                      });
-                    }}
-                    isLoading={
-                      loading && vars!.flow === -1 && vars!.postId == post.id
-                    }
-                    colorScheme={post.voteFlow === -1 ? "red" : undefined}
-                    aria-label="downflow post"
-                    icon={<ChevronDownIcon />}
-                  ></IconButton>
-                </Flex>
-                <Box>
-                  <Heading fontSize="xl">{post.title}</Heading>
-                  <Text mt={4}>{post.contentSnippet}</Text>
-                </Box>
-              </Flex>
-            ))
-          )}
+          {postsData.posts.map((post) => (
+            <Flex key={post.id} mt={2} p={5} shadow="md" borderWidth="1px">
+              <Voter post={post} />
+              <PostContent
+                post={{
+                  id: post.id,
+                  title: post.title,
+                  creatorEmail: post.creator.email,
+                  content: post.contentSnippet,
+                }}
+              />
+              <PostButtons creatorId={post.creatorId} id={post.id} />
+            </Flex>
+          ))}
         </Stack>
       </Wrapper>
     </>
