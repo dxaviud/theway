@@ -1,5 +1,6 @@
 import connectRedis from "connect-redis";
 import cors from "cors";
+import "dotenv-safe/config";
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import session from "express-session";
@@ -21,12 +22,13 @@ import { AppContext } from "./types";
 
   const app = express();
 
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
   redis.on("error", console.error);
   const RedisStore = connectRedis(session);
+  app.set("trust proxy", 1);
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -44,7 +46,7 @@ import { AppContext } from "./types";
         httpOnly: true,
         secure: PROD,
       },
-      secret: "the way that can be spoken is not the eternal way",
+      secret: process.env.SESSION_SECRET,
       resave: false,
     })
   );
@@ -75,7 +77,7 @@ import { AppContext } from "./types";
   app.get("/", (_, res) => {
     res.send("Hello World");
   });
-  app.listen(4000, () => {
-    console.log("Express server listening on localhost:4000");
+  app.listen(parseInt(process.env.PORT), () => {
+    console.log(`Express server listening on localhost:${process.env.PORT}`);
   });
 })();

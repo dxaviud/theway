@@ -3,18 +3,16 @@ import { PROD } from "./constants";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
 import { Vote } from "./entity/Vote";
-import { migration1670186183521 } from "./migration/1670186183521-migration";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: "postgres",
-  password: "postgres",
-  database: "theway",
+  // host: "localhost",
+  url: process.env.DATABASE_URL,
   synchronize: !PROD,
   logging: !PROD,
   entities: [User, Post, Vote],
-  migrations: [migration1670186183521],
+  migrations: [
+    /*migration1670186183521*/
+  ],
   subscribers: [],
 });

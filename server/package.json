@@ -11,7 +11,8 @@
     "migration:gen": "pnpm build && pnpm typeorm migration:generate ./src/migration/migration -d ./dist/data-source.js",
     "migration:run": "pnpm build && pnpm typeorm migration:run -d ./dist/data-source.js",
     "clean": "rm -rf dist & rm -rf node_modules && pnpm i",
-    "schema:drop": "pnpm build && pnpm typeorm schema:drop -d ./dist/data-source.js"
+    "schema:drop": "pnpm build && pnpm typeorm schema:drop -d ./dist/data-source.js",
+    "envgen": "npx gen-env-types .env -o src/env.d.ts -e ."
   },
   "keywords": [],
   "author": "David Xu",
@@ -33,6 +34,7 @@
     "class-validator": "^0.13.2",
     "connect-redis": "^6.1.3",
     "cors": "^2.8.5",
+    "dotenv-safe": "^8.2.0",
     "express": "^4.18.2",
     "express-graphql": "^0.12.0",
     "express-session": "^1.17.3",
