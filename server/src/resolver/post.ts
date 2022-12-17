@@ -106,14 +106,28 @@ ORDER BY p."createdDate" DESC
   }
 
   @Query(() => Post, { nullable: true })
-  post(
-    @Ctx() { entityManager }: AppContext,
+  async post(
+    @Ctx() { entityManager, req }: AppContext,
     @Arg("id", () => Int) id: number
   ): Promise<Post | null> {
-    return entityManager.findOne(Post, {
+    const post = await entityManager.findOne(Post, {
       relations: ["creator"],
       where: { id },
     });
+    if (!post) {
+      return null;
+    }
+    if (!req?.session.userId) {
+      return post;
+    }
+    const voteFlow = (await entityManager.query(`
+    SELECT flow as "voteFlow" FROM vote WHERE "userId" = ${
+      req!.session.userId
+    } AND "postId" = ${id}`)) as any[];
+    if (voteFlow.length > 0) {
+      post.voteFlow = voteFlow[0].voteFlow;
+    }
+    return post;
   }
 
   @Mutation(() => Post)

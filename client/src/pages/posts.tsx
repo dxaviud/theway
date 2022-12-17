@@ -21,7 +21,7 @@ const Posts = () => {
       </>
     );
   }
-  if (!postsData) {
+  if (!postsData?.posts || postsData.posts.length === 0) {
     return (
       <>
         <NavBar />

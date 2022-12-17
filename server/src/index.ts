@@ -16,9 +16,11 @@ import { AppContext } from "./types";
 
 (async () => {
   await AppDataSource.initialize();
-  await AppDataSource.runMigrations({
-    transaction: "all",
-  });
+  if (PROD) {
+    await AppDataSource.runMigrations({
+      transaction: "all",
+    });
+  }
 
   const app = express();
 
@@ -45,6 +47,7 @@ import { AppContext } from "./types";
         sameSite: "lax",
         httpOnly: true,
         secure: PROD,
+        // domain: PROD ? '.the-way.dev' : undefined,
       },
       secret: process.env.SESSION_SECRET,
       resave: false,
@@ -64,11 +67,11 @@ import { AppContext } from "./types";
     graphqlHTTP({
       schema: await buildSchema({
         resolvers: [HelloResolver, UserResolver, PostResolver],
-        emitSchemaFile: {
-          path: "src/schema.gql",
-          commentDescriptions: true,
-          sortedSchema: false,
-        },
+        // emitSchemaFile: {
+        //   path: "src/schema.gql",
+        //   commentDescriptions: true,
+        //   sortedSchema: false,
+        // },
       }),
       graphiql: true,
       context,

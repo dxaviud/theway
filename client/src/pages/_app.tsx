@@ -5,7 +5,7 @@ import { AppProps } from "next/app";
 import theme from "../theme";
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  uri: process.env.NEXT_PUBLIC_API_URL,
   cache: new InMemoryCache(),
   credentials: "include",
 });

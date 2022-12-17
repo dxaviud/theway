@@ -24,7 +24,10 @@ export const Voter: React.FC<VoterProps> = ({ post }) => {
   const [vote, { loading: voteLoading }] = useVoteMutation({
     refetchQueries: [{ query: PostsDocument }],
   });
-  const [vars, setVars] = useState<VoteMutationVariables>();
+  const [vars, setVars] = useState<VoteMutationVariables>({
+    flow: 0,
+    postId: 0,
+  });
   const router = useRouter();
 
   return (
@@ -44,7 +47,7 @@ export const Voter: React.FC<VoterProps> = ({ post }) => {
             variables,
           });
         }}
-        isLoading={voteLoading && vars!.flow === 1 && vars!.postId == post.id}
+        isLoading={voteLoading && vars?.flow === 1 && vars?.postId == post.id}
         colorScheme={post.voteFlow === 1 ? "green" : undefined}
         aria-label="upflow post"
         icon={<ChevronUpIcon />}
@@ -66,7 +69,7 @@ export const Voter: React.FC<VoterProps> = ({ post }) => {
             variables,
           });
         }}
-        isLoading={voteLoading && vars!.flow === -1 && vars!.postId == post.id}
+        isLoading={voteLoading && vars?.flow === -1 && vars?.postId == post.id}
         colorScheme={post.voteFlow === -1 ? "red" : undefined}
         aria-label="downflow post"
         icon={<ChevronDownIcon />}
